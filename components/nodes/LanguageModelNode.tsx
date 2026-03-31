@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { Handle, Position } from '@xyflow/react';
 import { Brain, Play, Info, ChevronDown, Lock, Key, X, Check } from 'lucide-react';
 import { useWorkflowStore } from '@/store/workflowStore';
@@ -10,6 +11,11 @@ const LanguageModelNode = ({ id, data }: { id: string, data: LanguageModelData }
   const updateNodeData = useWorkflowStore((state) => state.updateNodeData);
   const [showApiKeyModal, setShowApiKeyModal] = useState(false);
   const [tempApiKey, setTempApiKey] = useState(data.apiKey || '');
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Open modal if model is selected but no API key exists (simulated trigger)
   const handleModelChange = (model: string) => {
@@ -52,10 +58,10 @@ const LanguageModelNode = ({ id, data }: { id: string, data: LanguageModelData }
           </div>
           <div className="relative">
             <div className="absolute left-4 top-1/2 -translate-y-1/2 w-6 h-6 bg-emerald-100 rounded flex items-center justify-center overflow-hidden">
-               <div className="w-4 h-4 bg-emerald-600 rounded-sm rotate-45" />
+              <div className="w-4 h-4 bg-emerald-600 rounded-sm rotate-45" />
             </div>
             <select
-              className="w-full pl-12 pr-10 py-3.5 text-lg border border-slate-200 rounded-[14px] appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 bg-white text-slate-700"
+              className="w-full pl-5 pr-10 py-3.5 text-sm border border-slate-200 rounded-[14px] appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 bg-white text-slate-700"
               value={data.model || MODEL_OPTIONS[0]}
               onChange={(e) => handleModelChange(e.target.value)}
             >
@@ -73,13 +79,13 @@ const LanguageModelNode = ({ id, data }: { id: string, data: LanguageModelData }
             </div>
           </div>
           {data.apiKey ? (
-             <p className="text-xs text-emerald-600 mt-2 flex items-center gap-1">
-               <Check size={12} /> API Key configured
-             </p>
+            <p className="text-xs text-emerald-600 mt-2 flex items-center gap-1">
+              <Check size={12} /> API Key configured
+            </p>
           ) : (
-             <p className="text-xs text-amber-600 mt-2 flex items-center gap-1">
-               <Info size={12} /> API Key required
-             </p>
+            <p className="text-xs text-amber-600 mt-2 flex items-center gap-1">
+              <Info size={12} /> API Key required
+            </p>
           )}
         </div>
 
@@ -133,8 +139,8 @@ const LanguageModelNode = ({ id, data }: { id: string, data: LanguageModelData }
       {/* Footer */}
       <div className="bg-slate-50/80 p-6 pt-4 pb-4 flex items-center justify-end gap-3">
         <div className="flex items-center gap-2">
-           <span className="text-xl font-medium text-slate-900">Model Response</span>
-           <ChevronDown size={20} className="text-slate-400" />
+          <span className="text-xl font-medium text-slate-900">Model Response</span>
+          <ChevronDown size={20} className="text-slate-400" />
         </div>
         <div className="flex flex-col gap-0.5 opacity-40">
           <div className="w-4 h-[1.5px] bg-slate-900" />
@@ -152,7 +158,7 @@ const LanguageModelNode = ({ id, data }: { id: string, data: LanguageModelData }
       />
 
       {/* API Key Modal */}
-      {showApiKeyModal && (
+      {showApiKeyModal && mounted && createPortal(
         <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-[24px] shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in duration-200">
             <div className="p-6 border-b border-slate-100 flex items-center justify-between">
@@ -165,7 +171,7 @@ const LanguageModelNode = ({ id, data }: { id: string, data: LanguageModelData }
                   <p className="text-sm text-slate-500">{data.model}</p>
                 </div>
               </div>
-              <button 
+              <button
                 onClick={() => setShowApiKeyModal(false)}
                 className="text-slate-400 hover:text-slate-600 transition-colors"
               >
@@ -199,7 +205,8 @@ const LanguageModelNode = ({ id, data }: { id: string, data: LanguageModelData }
               </div>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );
