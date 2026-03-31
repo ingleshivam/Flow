@@ -43,30 +43,74 @@ export const executeWorkflowLogic = async (nodes: WorkflowNode[], edges: Edge[])
     throw new Error('Please connect a Prompt Template node to the System Message handle of the Language Model');
   }
 
-  // 4. Execute Simulation
-  await new Promise(resolve => setTimeout(resolve, 2000));
+  // 4. Parse Prompt Templates (Replace any {{input}} variables)
+  const formattedSystemPrompt = systemContent.replace(/\{\{\s*input\s*\}\}/g, inputContent);
 
-  const mockedResponse = `[${llmData.model} Output]
-Authenticated with API Key: ${llmData.apiKey.slice(0, 4)}...${llmData.apiKey.slice(-4)}
+  // 5. Execute Live LLM Request
+  let liveResponseText = '';
+  try {
+    const isOpenRouter = llmData.model.includes('/') || llmData.model.toLowerCase().includes('claude') || llmData.model.toLowerCase().includes('gemini') || llmData.model.toLowerCase().includes('llama');
+    const endpoint = isOpenRouter 
+      ? 'https://openrouter.ai/api/v1/chat/completions' 
+      : 'https://api.openai.com/v1/chat/completions';
 
-System: ${systemContent}
-Input: ${inputContent}
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${llmData.apiKey}`
+    };
 
-Response: This is a generated response based on your system message and user input. The workflow processed both separate paths successfully.`;
+    if (isOpenRouter) {
+      headers['HTTP-Referer'] = 'http://localhost:3000'; // Required by OpenRouter
+      headers['X-Title'] = 'Flow AI Workflow Builder';
+    }
 
-  // 5. Update LLM node output
+    // Determine actual model name. Since options include 'GPT-4o', map to correct ID if necessary, or pass strictly if OpenRouter.
+    let apiModelID = llmData.model;
+    if (!isOpenRouter) {
+      if (apiModelID.toLowerCase() === 'gpt-4o') apiModelID = 'gpt-4o';
+      if (apiModelID.toLowerCase() === 'gpt-4.1') apiModelID = 'gpt-4-turbo'; // Fallback mapping for OpenAI
+    }
+
+    const payload = {
+      model: apiModelID,
+      messages: [
+        { role: 'system', content: formattedSystemPrompt },
+        { role: 'user', content: inputContent }
+      ],
+      temperature: 0.7,
+    };
+
+    const response = await fetch(endpoint, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(payload)
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(`API Error (${response.status}): ${errorData.error?.message || response.statusText}`);
+    }
+
+    const json = await response.json();
+    liveResponseText = json.choices?.[0]?.message?.content || 'Error: No response content received.';
+  } catch (err: any) {
+    liveResponseText = `[Execution Failed] ${err.message}`;
+    throw new Error(`LLM Execution failed: ${err.message}`);
+  }
+
+  // 6. Update LLM node output
   updatedNodes = updateNodeOutput(updatedNodes, llmNode.id, { 
-    output: mockedResponse,
+    output: liveResponseText,
     inputText: inputContent,
-    systemMessage: systemContent
+    systemMessage: formattedSystemPrompt
   });
 
-  // 6. Push to Chat Output if connected
+  // 7. Push to Chat Output if connected
   const outputEdge = edges.find(e => e.source === llmNode.id);
   if (outputEdge) {
     const outputNode = nodes.find(n => n.id === outputEdge.target);
     if (outputNode?.type === 'chatOutput') {
-      updatedNodes = updateNodeOutput(updatedNodes, outputNode.id, { output: mockedResponse });
+      updatedNodes = updateNodeOutput(updatedNodes, outputNode.id, { output: liveResponseText });
     }
   }
 

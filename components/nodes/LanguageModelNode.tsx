@@ -1,21 +1,34 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { createPortal } from 'react-dom';
 import { Handle, Position } from '@xyflow/react';
-import { Brain, Play, Info, ChevronDown, Lock, Key, X, Check } from 'lucide-react';
+import { Brain, Play, Info, Lock, Key, Check } from 'lucide-react';
 import { useWorkflowStore } from '@/store/workflowStore';
 import { LanguageModelData, MODEL_OPTIONS } from '@/types/workflow';
+
+// shadcn UI components
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 const LanguageModelNode = ({ id, data }: { id: string, data: LanguageModelData }) => {
   const updateNodeData = useWorkflowStore((state) => state.updateNodeData);
   const [showApiKeyModal, setShowApiKeyModal] = useState(false);
   const [tempApiKey, setTempApiKey] = useState(data.apiKey || '');
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   // Open modal if model is selected but no API key exists (simulated trigger)
   const handleModelChange = (model: string) => {
@@ -29,17 +42,37 @@ const LanguageModelNode = ({ id, data }: { id: string, data: LanguageModelData }
   };
 
   return (
-    <div className="bg-white rounded-[32px] border border-slate-200 shadow-sm w-[420px] overflow-hidden group transition-all hover:shadow-md hover:border-slate-300 relative">
+    <div className="bg-white rounded-2xl border border-border shadow-sm w-[350px] group transition-all hover:shadow-md hover:border-slate-300 relative">
+      <Handle
+        type="target"
+        position={Position.Left}
+        id="input"
+        className="!w-3 !h-3 !bg-blue-600 !border-[2px] !border-white !-left-1.5 shadow-sm hover:scale-125 transition-transform"
+        style={{ top: '48%' }}
+      />
+      <Handle
+        type="target"
+        position={Position.Left}
+        id="systemMessage"
+        className="!w-3 !h-3 !bg-purple-600 !border-[2px] !border-white !-left-1.5 shadow-sm hover:scale-125 transition-transform"
+        style={{ top: '72%' }}
+      />
+      <Handle
+        type="source"
+        position={Position.Right}
+        className="!w-3 !h-3 !bg-blue-600 !border-[2px] !border-white !-right-1.5 shadow-sm hover:scale-125 transition-transform"
+        style={{ top: '50%' }}
+      />
       {/* Header */}
-      <div className="p-6 pb-4">
-        <div className="flex items-center justify-between mb-2">
-          <div className="flex items-center gap-3">
-            <Brain size={24} className="text-slate-900" />
-            <span className="text-xl font-semibold text-slate-900">Language Model</span>
+      <div className="p-4 pb-3">
+        <div className="flex items-center justify-between mb-1.5">
+          <div className="flex items-center gap-2">
+            <Brain size={18} className="text-primary" />
+            <span className="text-base font-bold text-slate-900 tracking-tight">Language Model</span>
           </div>
-          <Play size={20} className="text-slate-400 font-light" />
+          <Play size={16} className="text-slate-400 font-light" />
         </div>
-        <p className="text-slate-500 text-sm">
+        <p className="text-slate-500 text-[11px] leading-snug">
           Runs a language model given a specified provider.
         </p>
       </div>
@@ -47,36 +80,36 @@ const LanguageModelNode = ({ id, data }: { id: string, data: LanguageModelData }
       <div className="h-px bg-slate-100" />
 
       {/* Body */}
-      <div className="p-6 pt-5 pb-8 space-y-6">
+      <div className="p-4 pt-4 pb-6 space-y-4">
         {/* Model Selection */}
         <div>
-          <div className="flex items-center gap-1.5 mb-3">
-            <label className="text-lg font-medium text-slate-800">
-              Language Model<span className="text-red-500">*</span>
+          <div className="flex items-center gap-1.5 mb-2">
+            <label className="text-xs font-bold text-slate-700">
+              Model<span className="text-red-500">*</span>
             </label>
-            <Info size={16} className="text-slate-300" />
+            <Info size={14} className="text-slate-300" />
           </div>
           <div className="relative">
-            <div className="absolute left-4 top-1/2 -translate-y-1/2 w-6 h-6 bg-emerald-100 rounded flex items-center justify-center overflow-hidden">
-              <div className="w-4 h-4 bg-emerald-600 rounded-sm rotate-45" />
-            </div>
-            <select
-              className="w-full pl-5 pr-10 py-3.5 text-sm border border-slate-200 rounded-[14px] appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 bg-white text-slate-700"
+            <Select
               value={data.model || MODEL_OPTIONS[0]}
-              onChange={(e) => handleModelChange(e.target.value)}
+              onValueChange={handleModelChange}
             >
-              {MODEL_OPTIONS.map((option) => (
-                <option key={option} value={option}>
-                  {option.toLowerCase()}
-                </option>
-              ))}
-            </select>
-            <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
-              <div className="flex flex-col gap-1 opacity-60">
-                <ChevronDown size={18} className="rotate-180 -mb-2" />
-                <ChevronDown size={18} />
-              </div>
-            </div>
+              <SelectTrigger className="w-full h-10 text-xs rounded-xl border-border px-3 focus:ring-primary/20">
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 bg-emerald-100 rounded flex items-center justify-center overflow-hidden shrink-0">
+                    <div className="w-2.5 h-2.5 bg-emerald-600 rounded-[2px] rotate-45" />
+                  </div>
+                  <SelectValue placeholder="Select a model" />
+                </div>
+              </SelectTrigger>
+              <SelectContent className="rounded-xl border-border shadow-xl">
+                {MODEL_OPTIONS.map((option) => (
+                  <SelectItem key={option} value={option} className="py-2 text-xs font-medium capitalize">
+                    {option.toLowerCase()}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
           {data.apiKey ? (
             <p className="text-xs text-emerald-600 mt-2 flex items-center gap-1">
@@ -91,123 +124,100 @@ const LanguageModelNode = ({ id, data }: { id: string, data: LanguageModelData }
 
         {/* Input Field */}
         <div>
-          <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-1.5">
-              <label className="text-lg font-medium text-slate-800">Input</label>
-              <Info size={16} className="text-slate-300" />
+              <label className="text-xs font-bold text-slate-700">Input</label>
+              <Info size={14} className="text-slate-300" />
             </div>
           </div>
           <div className="relative">
-            <div className="w-full p-4 pr-12 text-lg border border-slate-100 rounded-[14px] bg-slate-50/50 text-slate-400 truncate">
+            <div className="w-full p-2.5 pr-8 text-xs border border-slate-100 rounded-xl bg-slate-50/50 text-slate-500 truncate font-medium">
               {data.inputText || 'Receiving input...'}
             </div>
-            <Lock size={20} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-300" />
-            <Handle
-              type="target"
-              position={Position.Left}
-              id="input"
-              className="!w-4 !h-4 !bg-blue-600 !border-[3px] !border-white !-left-[22px] shadow-sm"
-              style={{ top: '50%' }}
-            />
+            <Lock size={16} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-300" />
           </div>
         </div>
 
         {/* System Message Field */}
         <div>
-          <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-1.5">
-              <label className="text-lg font-medium text-slate-800">System Message</label>
-              <Info size={16} className="text-slate-300" />
+              <label className="text-xs font-bold text-slate-700">System Message</label>
+              <Info size={14} className="text-slate-300" />
             </div>
           </div>
           <div className="relative">
-            <div className="w-full p-4 pr-12 text-lg border border-slate-100 rounded-[14px] bg-slate-50/50 text-slate-400 truncate">
+            <div className="w-full p-2.5 pr-8 text-xs border border-slate-100 rounded-xl bg-slate-50/50 text-slate-500 truncate font-medium">
               {data.systemMessage || 'Receiving input...'}
             </div>
-            <Lock size={20} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-300" />
-            <Handle
-              type="target"
-              position={Position.Left}
-              id="systemMessage"
-              className="!w-4 !h-4 !bg-purple-600 !border-[3px] !border-white !-left-[22px] shadow-sm"
-              style={{ top: '50%' }}
-            />
+            <Lock size={16} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-300" />
           </div>
         </div>
       </div>
 
       {/* Footer */}
-      <div className="bg-slate-50/80 p-6 pt-4 pb-4 flex items-center justify-end gap-3">
-        <div className="flex items-center gap-2">
-          <span className="text-xl font-medium text-slate-900">Model Response</span>
-          <ChevronDown size={20} className="text-slate-400" />
-        </div>
-        <div className="flex flex-col gap-0.5 opacity-40">
-          <div className="w-4 h-[1.5px] bg-slate-900" />
-          <div className="w-4 h-[1.5px] bg-slate-900" />
-          <div className="w-4 h-[1.5px] bg-slate-900 flex items-center justify-center">
-            <div className="w-1 h-1 bg-slate-900 rounded-full ml-auto translate-x-1" />
+      <div className="bg-slate-50/50 p-4 pt-3 pb-3 flex items-center justify-end gap-2 text-primary font-bold">
+        <span className="text-xs uppercase tracking-widest">Model Response</span>
+        <div className="flex flex-col gap-0.5 opacity-60">
+          <div className="w-3.5 h-[1.5px] bg-primary" />
+          <div className="w-3.5 h-[1.5px] bg-primary" />
+          <div className="w-3.5 h-[1.5px] bg-primary flex items-center justify-center">
+            <div className="w-1 h-1 bg-primary rounded-full ml-auto translate-x-0.5" />
           </div>
         </div>
       </div>
 
-      <Handle
-        type="source"
-        position={Position.Right}
-        className="!w-4 !h-4 !bg-blue-600 !border-[3px] !border-white !-right-2 shadow-sm"
-      />
-
-      {/* API Key Modal */}
-      {showApiKeyModal && mounted && createPortal(
-        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-[24px] shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in duration-200">
-            <div className="p-6 border-b border-slate-100 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-blue-50 rounded-full flex items-center justify-center text-blue-600">
-                  <Key size={20} />
-                </div>
-                <div>
-                  <h3 className="text-lg font-bold text-slate-900">Enter API Key</h3>
-                  <p className="text-sm text-slate-500">{data.model}</p>
-                </div>
-              </div>
-              <button
-                onClick={() => setShowApiKeyModal(false)}
-                className="text-slate-400 hover:text-slate-600 transition-colors"
-              >
-                <X size={24} />
-              </button>
+      {/* API Key Modal with shadcn Dialog */}
+      <Dialog open={showApiKeyModal} onOpenChange={setShowApiKeyModal}>
+        <DialogContent className="max-w-sm rounded-2xl p-0 overflow-hidden border-none shadow-2xl">
+          <DialogHeader className="p-5 border-b border-slate-100 flex flex-row items-center gap-3 space-y-0 text-left bg-slate-50/50">
+            <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center text-primary shrink-0">
+              <Key size={20} />
             </div>
-            <div className="p-6 space-y-4">
-              <p className="text-sm text-slate-600">
-                To access the language model, please provide your API key. This key is only stored locally in your browser.
+            <div>
+              <DialogTitle className="text-base font-bold text-slate-900 leading-none">API Key</DialogTitle>
+              <DialogDescription className="text-xs text-slate-500 font-medium mt-1">
+                Configure {data.model}
+              </DialogDescription>
+            </div>
+          </DialogHeader>
+          
+          <div className="p-5 space-y-5">
+            <div className="bg-blue-50/50 p-3 rounded-xl border border-blue-100/50">
+              <p className="text-[11px] text-blue-700 leading-relaxed font-medium">
+                Your API key is stored locally and used only for requests from this browser.
               </p>
-              <input
+            </div>
+            
+            <div className="space-y-1.5">
+              <label className="text-[11px] font-bold text-slate-700 ml-0.5 uppercase tracking-wider">Secret Key</label>
+              <Input
                 type="password"
-                className="w-full p-4 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
+                className="h-10 rounded-xl border-border px-3 text-sm focus:ring-primary/20"
                 placeholder="sk-..."
                 value={tempApiKey}
                 onChange={(e) => setTempApiKey(e.target.value)}
               />
-              <div className="flex gap-3 pt-2">
-                <button
-                  onClick={() => setShowApiKeyModal(false)}
-                  className="flex-1 px-4 py-3 border border-slate-200 rounded-xl text-slate-600 font-medium hover:bg-slate-50 transition-colors"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={saveApiKey}
-                  className="flex-1 px-4 py-3 bg-blue-600 rounded-xl text-white font-medium hover:bg-blue-700 transition-colors shadow-sm"
-                >
-                  Save Key
-                </button>
-              </div>
             </div>
           </div>
-        </div>,
-        document.body
-      )}
+
+          <DialogFooter className="p-5 pt-0 flex gap-2 sm:justify-end">
+            <Button
+              variant="outline"
+              onClick={() => setShowApiKeyModal(false)}
+              className="h-10 flex-1 sm:flex-none px-4 rounded-xl border-border font-bold text-xs uppercase tracking-wider text-slate-500 hover:bg-slate-50 transition-all"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={saveApiKey}
+              className="h-10 flex-1 sm:flex-none px-6 rounded-xl bg-primary hover:bg-primary/90 text-white font-black text-xs uppercase tracking-widest shadow-lg shadow-primary/20 transition-all"
+            >
+              Save Key
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

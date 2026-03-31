@@ -57,4 +57,5 @@ export const MODEL_OPTIONS = [
   'Claude 3.7 Sonnet',
   'Gemini 2.5 Pro',
   'Llama 3.1 70B',
+  'openai/gpt-oss-120b',
 ];
