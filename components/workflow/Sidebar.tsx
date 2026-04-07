@@ -1,5 +1,22 @@
 import React from 'react';
-import { MessageSquare, Terminal, Bot, Layout, LucideIcon, Info, Database } from 'lucide-react';
+import { 
+  MessageSquare, 
+  Terminal, 
+  Bot, 
+  Layout, 
+  LucideIcon, 
+  Info, 
+  Database, 
+  History, 
+  Upload, 
+  FileText, 
+  Scissors, 
+  Fingerprint, 
+  Search,
+  Cpu,
+  Layers,
+  Sparkles
+} from 'lucide-react';
 import { NodeType } from '@/types/workflow';
 import { 
   Card, 
@@ -10,7 +27,6 @@ import {
   TooltipContent, 
   TooltipTrigger 
 } from "@/components/ui/tooltip";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
@@ -78,45 +94,100 @@ const Sidebar = () => {
         </p>
       </div>
       
-      <ScrollArea className="flex-1 w-full">
-        <div className="p-4 space-y-3">
-          <NodeItem
-            type="chatInput"
-            label="Chat Input"
-            icon={MessageSquare}
-            description="Captures user input or a starting question for the workflow."
-            color="bg-blue-600"
-          />
-          <NodeItem
-            type="promptTemplate"
-            label="Prompt Template"
-            icon={Terminal}
-            description="Allows you to format input texts using variables and custom templates."
-            color="bg-indigo-600"
-          />
-          <NodeItem
-            type="languageModel"
-            label="Language Model"
-            icon={Bot}
-            description="The core execution unit. Proxies the prompt to an AI model like GPT-4o."
-            color="bg-emerald-600"
-          />
-          <NodeItem
-            type="chatOutput"
-            label="Chat Output"
-            icon={Layout}
-            description="The final destination. Returns the processed AI response to the user."
-            color="bg-orange-600"
-          />
-          <NodeItem
-            type="memory"
-            label="Memory"
-            icon={Database}
-            description="Stores conversation history and injects past turns into the Language Model for multi-turn awareness."
-            color="bg-pink-500"
-          />
+      <div className="flex-1 overflow-y-auto w-full min-h-0 custom-scrollbar">
+        <div className="p-4 space-y-6">
+          {/* AI & Core Section */}
+          <div className="space-y-3">
+            <h3 className="px-2 text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+              <Sparkles size={12} /> AI & Core
+            </h3>
+            <NodeItem
+              type="chatInput"
+              label="Chat Input"
+              icon={MessageSquare}
+              description="Captures user input or a starting question for the workflow."
+              color="bg-blue-600"
+            />
+            <NodeItem
+              type="promptTemplate"
+              label="Prompt Template"
+              icon={Terminal}
+              description="Allows you to format input texts using variables and custom templates."
+              color="bg-indigo-600"
+            />
+            <NodeItem
+              type="languageModel"
+              label="Language Model"
+              icon={Bot}
+              description="The core execution unit. Proxies the prompt to an AI model."
+              color="bg-emerald-600"
+            />
+            <NodeItem
+              type="memory"
+              label="Chat Memory"
+              icon={History}
+              description="Stores conversation history for multi-turn awareness."
+              color="bg-pink-500"
+            />
+            <NodeItem
+              type="chatOutput"
+              label="Chat Output"
+              icon={Layout}
+              description="Returns the processed AI response to the user."
+              color="bg-orange-600"
+            />
+          </div>
+
+          {/* RAG & Retrieval Section */}
+          <div className="space-y-3 pt-2">
+            <h3 className="px-2 text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+              <Layers size={12} /> Data & Retrieval
+            </h3>
+            <NodeItem
+              type="fileUpload"
+              label="File Upload"
+              icon={Upload}
+              description="Upload local documents (PDF, Text) to your workflow."
+              color="bg-blue-500"
+            />
+            <NodeItem
+              type="documentLoader"
+              label="Doc Loader"
+              icon={FileText}
+              description="Parses uploaded files into readable text documents."
+              color="bg-indigo-500"
+            />
+            <NodeItem
+              type="textSplitter"
+              label="Text Splitter"
+              icon={Scissors}
+              description="Chunks long documents into smaller segments for indexing."
+              color="bg-purple-500"
+            />
+            <NodeItem
+              type="embeddings"
+              label="Embeddings"
+              icon={Fingerprint}
+              description="Converts text chunks into numerical vector representations."
+              color="bg-pink-600"
+            />
+            <NodeItem
+              type="vectorStore"
+              label="Vector Store"
+              icon={Database}
+              description="A database for storing and managing your indexed vectors."
+              color="bg-emerald-500"
+            />
+            <NodeItem
+              type="retriever"
+              label="Retriever"
+              icon={Search}
+              description="Searches the Vector Store for relevant context to ground the LLM."
+              color="bg-orange-500"
+            />
+          </div>
         </div>
-      </ScrollArea>
+      </div>
 
       <div className="p-4 border-t border-slate-100 bg-slate-50/30">
         <div className="bg-white p-3.5 rounded-xl border border-slate-200 shadow-sm ring-1 ring-slate-200/50">

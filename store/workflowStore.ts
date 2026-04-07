@@ -87,6 +87,25 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
     });
     localStorage.setItem('workflow-nodes', JSON.stringify(get().nodes));
   },
+  
+  onNodesDelete: (deletedNodes: WorkflowNode[]) => {
+    set({
+      nodes: get().nodes.filter((node) => !deletedNodes.some((d) => d.id === node.id)),
+    });
+    localStorage.setItem('workflow-nodes', JSON.stringify(get().nodes));
+    toast.success('Node removed');
+  },
+
+  deleteNode: (nodeId: string) => {
+    set({
+      nodes: get().nodes.filter((node) => node.id !== nodeId),
+      // Also remove any connected edges
+      edges: get().edges.filter((edge) => edge.source !== nodeId && edge.target !== nodeId),
+    });
+    localStorage.setItem('workflow-nodes', JSON.stringify(get().nodes));
+    localStorage.setItem('workflow-edges', JSON.stringify(get().edges));
+    toast.success('Node removed');
+  },
 
   executeWorkflow: async () => {
     const { nodes, edges } = get();

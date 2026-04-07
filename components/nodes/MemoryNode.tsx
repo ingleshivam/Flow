@@ -2,12 +2,13 @@
 
 import React from 'react';
 import { Handle, Position } from '@xyflow/react';
-import { Brain, Clock, Trash2, Info, User, Bot, ChevronUp, ChevronDown } from 'lucide-react';
+import { Brain, Clock, Trash2, Info, User, Bot, ChevronUp, ChevronDown, History } from 'lucide-react';
 import { useWorkflowStore } from '@/store/workflowStore';
 import { MemoryData, MemoryMessage } from '@/types/workflow';
 
 const MemoryNode = ({ id, data }: { id: string; data: MemoryData }) => {
   const updateNodeData = useWorkflowStore((state) => state.updateNodeData);
+  const deleteNode = useWorkflowStore((state) => state.deleteNode);
 
   const windowSize = data.windowSize ?? 5;
   const history: MemoryMessage[] = data.history ?? [];
@@ -32,15 +33,19 @@ const MemoryNode = ({ id, data }: { id: string; data: MemoryData }) => {
       {/* Header */}
       <div className="p-4 pb-3">
         <div className="flex items-center justify-between mb-1.5">
-          <div className="flex items-center gap-2">
-            <Brain size={18} className="text-pink-500" />
-            <span className="text-base font-bold text-slate-900 tracking-tight">Memory</span>
+          <div className="flex items-center gap-2 text-pink-500 font-black tracking-tight">
+            <History size={18} />
+            <span className="text-base text-slate-900">Chat Memory</span>
           </div>
-          <div className="flex items-center gap-2">
-            <Clock size={13} className="text-slate-400" />
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-              {history.length} msg{history.length !== 1 ? 's' : ''}
-            </span>
+          <div className="flex items-center gap-1">
+            <button 
+              onClick={() => deleteNode(id)}
+              className="p-1.5 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
+              title="Delete node"
+            >
+              <Trash2 size={14} />
+            </button>
+            <Clock size={16} className="text-slate-300" />
           </div>
         </div>
         <p className="text-slate-500 text-[11px] leading-snug">

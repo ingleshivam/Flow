@@ -1,11 +1,12 @@
 import React from 'react';
 import { Handle, Position } from '@xyflow/react';
-import { MessageSquare, Play, Info, Maximize2 } from 'lucide-react';
+import { MessageSquare, Info, Trash2, Maximize2 } from 'lucide-react';
 import { useWorkflowStore } from '@/store/workflowStore';
 import { ChatInputData } from '@/types/workflow';
 
-const ChatInputNode = ({ id, data }: { id: string, data: ChatInputData }) => {
+const ChatInputNode = ({ id, data }: { id: string; data: ChatInputData }) => {
   const updateNodeData = useWorkflowStore((state) => state.updateNodeData);
+  const deleteNode = useWorkflowStore((state) => state.deleteNode);
 
   return (
     <div className="bg-white rounded-2xl border border-border shadow-sm w-[350px] group transition-all hover:shadow-md hover:border-slate-300 relative">
@@ -17,11 +18,20 @@ const ChatInputNode = ({ id, data }: { id: string, data: ChatInputData }) => {
       />
       <div className="p-4 pb-3">
         <div className="flex items-center justify-between mb-1.5">
-          <div className="flex items-center gap-2 text-blue-600">
+          <div className="flex items-center gap-2 text-blue-600 font-black tracking-tight">
             <MessageSquare size={18} />
-            <span className="text-base font-bold text-slate-900 tracking-tight">Chat Input</span>
+            <span className="text-base text-slate-900">Chat Input</span>
           </div>
-          <Play size={16} className="text-slate-400 font-light" />
+          <div className="flex items-center gap-1">
+            <button 
+              onClick={() => deleteNode(id)}
+              className="p-1.5 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
+              title="Delete node"
+            >
+              <Trash2 size={14} />
+            </button>
+            <Info size={16} className="text-slate-300" />
+          </div>
         </div>
         <p className="text-slate-500 text-[11px] leading-snug">
           Get chat inputs from the Playground.

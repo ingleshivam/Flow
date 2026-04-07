@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { Handle, Position } from '@xyflow/react';
-import { Brain, Play, Info, Lock, Key, Check, Cpu } from 'lucide-react';
+import { Brain, Play, Info, Lock, Key, Check, Cpu, Trash2 } from 'lucide-react';
 import { useWorkflowStore } from '@/store/workflowStore';
 import { LanguageModelData, PROVIDERS, PROVIDER_MODELS, Provider } from '@/types/workflow';
 
@@ -34,6 +34,7 @@ const PROVIDER_COLORS: Record<Provider, { bg: string; dot: string; text: string 
 
 const LanguageModelNode = ({ id, data }: { id: string; data: LanguageModelData }) => {
   const updateNodeData = useWorkflowStore((state) => state.updateNodeData);
+  const deleteNode = useWorkflowStore((state) => state.deleteNode);
   const [showApiKeyModal, setShowApiKeyModal] = useState(false);
   const [tempApiKey, setTempApiKey] = useState(data.apiKey || '');
 
@@ -70,21 +71,28 @@ const LanguageModelNode = ({ id, data }: { id: string; data: LanguageModelData }
         position={Position.Left}
         id="input"
         className="!w-3 !h-3 !bg-blue-600 !border-[2px] !border-white !-left-1.5 shadow-sm hover:scale-125 transition-transform"
-        style={{ top: '42%' }}
+        style={{ top: '35%' }}
       />
       <Handle
         type="target"
         position={Position.Left}
         id="systemMessage"
         className="!w-3 !h-3 !bg-purple-600 !border-[2px] !border-white !-left-1.5 shadow-sm hover:scale-125 transition-transform"
-        style={{ top: '63%' }}
+        style={{ top: '53%' }}
       />
       <Handle
         type="target"
         position={Position.Left}
         id="memory"
         className="!w-3 !h-3 !bg-pink-500 !border-[2px] !border-white !-left-1.5 shadow-sm hover:scale-125 transition-transform"
-        style={{ top: '84%' }}
+        style={{ top: '71%' }}
+      />
+      <Handle
+        type="target"
+        position={Position.Left}
+        id="context"
+        className="!w-3 !h-3 !bg-orange-600 !border-[2px] !border-white !-left-1.5 shadow-sm hover:scale-125 transition-transform"
+        style={{ top: '89%' }}
       />
       <Handle
         type="source"
@@ -100,7 +108,16 @@ const LanguageModelNode = ({ id, data }: { id: string; data: LanguageModelData }
             <Brain size={18} className="text-primary" />
             <span className="text-base font-bold text-slate-900 tracking-tight">Language Model</span>
           </div>
-          <Play size={16} className="text-slate-400 font-light" />
+          <div className="flex items-center gap-1">
+            <button 
+              onClick={() => deleteNode(id)}
+              className="p-1.5 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
+              title="Delete node"
+            >
+              <Trash2 size={14} />
+            </button>
+            <Play size={16} className="text-slate-400 font-light" />
+          </div>
         </div>
         <p className="text-slate-500 text-[11px] leading-snug">
           Runs a language model given a specified provider.

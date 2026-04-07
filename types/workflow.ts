@@ -1,6 +1,17 @@
 import { Edge, Node, OnConnect, OnEdgesChange, OnNodesChange, OnEdgesDelete } from '@xyflow/react';
 
-export type NodeType = 'chatInput' | 'promptTemplate' | 'languageModel' | 'chatOutput' | 'memory';
+export type NodeType = 
+  | 'chatInput' 
+  | 'promptTemplate' 
+  | 'languageModel' 
+  | 'chatOutput' 
+  | 'memory' 
+  | 'fileUpload' 
+  | 'documentLoader' 
+  | 'textSplitter' 
+  | 'embeddings' 
+  | 'vectorStore' 
+  | 'retriever';
 
 export type Provider = 'openai' | 'openrouter' | 'groq';
 
@@ -22,7 +33,48 @@ export interface LanguageModelData extends Record<string, any> {
   model: string;
   systemMessage: string;
   inputText: string;
+  context?: string; // For RAG injected context
   apiKey?: string;
+  output?: string;
+}
+
+export interface FileUploadData extends Record<string, any> {
+  label: string;
+  files?: { name: string; size: number; content?: string }[];
+  output?: string;
+}
+
+export interface DocumentLoaderData extends Record<string, any> {
+  label: string;
+  documents?: { text: string; metadata: any }[];
+  output?: string;
+}
+
+export interface TextSplitterData extends Record<string, any> {
+  label: string;
+  chunkSize?: number;
+  chunkOverlap?: number;
+  output?: string;
+}
+
+export interface EmbeddingsData extends Record<string, any> {
+  label: string;
+  provider?: 'openai' | 'local';
+  model?: string;
+  apiKey?: string;
+  output?: string;
+}
+
+export interface VectorStoreData extends Record<string, any> {
+  label: string;
+  indexName?: string;
+  status?: 'empty' | 'indexing' | 'ready';
+  output?: string;
+}
+
+export interface RetrieverData extends Record<string, any> {
+  label: string;
+  topK?: number;
   output?: string;
 }
 
@@ -45,7 +97,18 @@ export interface MemoryData extends Record<string, any> {
   output?: string;
 }
 
-export type NodeData = ChatInputData | PromptTemplateData | LanguageModelData | ChatOutputData | MemoryData;
+export type NodeData = 
+  | ChatInputData 
+  | PromptTemplateData 
+  | LanguageModelData 
+  | ChatOutputData 
+  | MemoryData 
+  | FileUploadData 
+  | DocumentLoaderData 
+  | TextSplitterData 
+  | EmbeddingsData 
+  | VectorStoreData 
+  | RetrieverData;
 
 export interface WorkflowNode extends Node {
   type: NodeType;
@@ -62,6 +125,8 @@ export interface WorkflowState {
   setNodes: (nodes: WorkflowNode[]) => void;
   setEdges: (edges: Edge[]) => void;
   updateNodeData: (nodeId: string, data: Partial<NodeData>) => void;
+  deleteNode: (nodeId: string) => void;
+  onNodesDelete: (deletedNodes: WorkflowNode[]) => void;
   executeWorkflow: () => Promise<void>;
   status: 'idle' | 'running' | 'success' | 'error';
   errorMessage: string | null;

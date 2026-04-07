@@ -1,11 +1,12 @@
 import React from 'react';
 import { Handle, Position } from '@xyflow/react';
-import { Code, Play, Info } from 'lucide-react';
+import { Code, Trash2, Settings2, Info } from 'lucide-react';
 import { useWorkflowStore } from '@/store/workflowStore';
 import { PromptTemplateData } from '@/types/workflow';
 
 const PromptTemplateNode = ({ id, data }: { id: string, data: PromptTemplateData }) => {
   const updateNodeData = useWorkflowStore((state) => state.updateNodeData);
+  const deleteNode = useWorkflowStore((state) => state.deleteNode);
 
   return (
     <div className="bg-white rounded-2xl border border-border shadow-sm w-[350px] group transition-all hover:shadow-md hover:border-slate-300 relative">
@@ -23,7 +24,16 @@ const PromptTemplateNode = ({ id, data }: { id: string, data: PromptTemplateData
             <Code size={18} />
             <span className="text-base font-bold text-slate-900 tracking-tight">Prompt Template</span>
           </div>
-          <Play size={16} className="text-slate-400 font-light" />
+          <div className="flex items-center gap-1">
+            <button 
+              onClick={() => deleteNode(id)}
+              className="p-1.5 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
+              title="Delete node"
+            >
+              <Trash2 size={14} />
+            </button>
+            <Settings2 size={16} className="text-slate-300" />
+          </div>
         </div>
         <p className="text-slate-500 text-[11px] leading-snug">
           Create a prompt template with dynamic variables.

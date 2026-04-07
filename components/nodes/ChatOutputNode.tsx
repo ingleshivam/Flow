@@ -1,9 +1,11 @@
 import React from 'react';
 import { Handle, Position } from '@xyflow/react';
-import { MessageSquare, Play, Info, Lock } from 'lucide-react';
+import { MessageSquare, Play, Info, Lock, Trash2 } from 'lucide-react';
 import { ChatOutputData } from '@/types/workflow';
+import { useWorkflowStore } from '@/store/workflowStore';
 
-const ChatOutputNode = ({ data }: { data: ChatOutputData }) => {
+const ChatOutputNode = ({ id, data }: { id: string; data: ChatOutputData }) => {
+  const deleteNode = useWorkflowStore((state) => state.deleteNode);
   return (
     <div className="bg-white rounded-2xl border border-border shadow-sm w-[350px] group transition-all hover:shadow-md hover:border-slate-300 relative">
       <Handle
@@ -20,7 +22,16 @@ const ChatOutputNode = ({ data }: { data: ChatOutputData }) => {
             <MessageSquare size={18} />
             <span className="text-base font-bold text-slate-900 tracking-tight">Chat Output</span>
           </div>
-          <Play size={16} className="text-slate-400 font-light" />
+          <div className="flex items-center gap-1">
+            <button 
+              onClick={() => deleteNode(id)}
+              className="p-1.5 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
+              title="Delete node"
+            >
+              <Trash2 size={14} />
+            </button>
+            <Play size={16} className="text-slate-400 font-light" />
+          </div>
         </div>
         <p className="text-slate-500 text-[11px] leading-snug">
           Display a chat message in the Playground.

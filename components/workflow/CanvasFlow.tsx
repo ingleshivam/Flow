@@ -19,6 +19,12 @@ import PromptTemplateNode from '../nodes/PromptTemplateNode';
 import LanguageModelNode from '../nodes/LanguageModelNode';
 import ChatOutputNode from '../nodes/ChatOutputNode';
 import MemoryNode from '../nodes/MemoryNode';
+import FileUploadNode from '../nodes/FileUploadNode';
+import DocumentLoaderNode from '../nodes/DocumentLoaderNode';
+import TextSplitterNode from '../nodes/TextSplitterNode';
+import EmbeddingsNode from '../nodes/EmbeddingsNode';
+import VectorStoreNode from '../nodes/VectorStoreNode';
+import RetrieverNode from '../nodes/RetrieverNode';
 import { NodeType, WorkflowNode, ChatInputData, PromptTemplateData, LanguageModelData } from '@/types/workflow';
 import { v4 as uuidv4 } from 'uuid';
 import { Layout } from 'lucide-react';
@@ -31,6 +37,12 @@ const nodeTypes = {
   languageModel: LanguageModelNode,
   chatOutput: ChatOutputNode,
   memory: MemoryNode,
+  fileUpload: FileUploadNode,
+  documentLoader: DocumentLoaderNode,
+  textSplitter: TextSplitterNode,
+  embeddings: EmbeddingsNode,
+  vectorStore: VectorStoreNode,
+  retriever: RetrieverNode,
 };
 
 const edgeTypes = {
@@ -39,7 +51,7 @@ const edgeTypes = {
 
 const CanvasFlow = () => {
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
-  const { nodes, edges, onNodesChange, onEdgesChange, onEdgesDelete, onConnect, setNodes } = useWorkflowStore();
+  const { nodes, edges, onNodesChange, onEdgesChange, onEdgesDelete, onNodesDelete, onConnect, setNodes } = useWorkflowStore();
   const { screenToFlowPosition } = useReactFlow();
 
   const onDragOver = useCallback((event: React.DragEvent) => {
@@ -73,6 +85,12 @@ const CanvasFlow = () => {
           ...(type === 'languageModel' ? { provider: 'openai', model: 'gpt-4o', systemMessage: '', inputText: '', apiKey: '' } : {}),
           ...(type === 'chatOutput' ? { output: '' } : {}),
           ...(type === 'memory' ? { windowSize: 5, history: [] } : {}),
+          ...(type === 'fileUpload' ? { files: [] } : {}),
+          ...(type === 'documentLoader' ? { documents: [] } : {}),
+          ...(type === 'textSplitter' ? { chunkSize: 1000, chunkOverlap: 200 } : {}),
+          ...(type === 'embeddings' ? { provider: 'openai', model: 'text-embedding-3-small', apiKey: '' } : {}),
+          ...(type === 'vectorStore' ? { indexName: 'default-index', status: 'empty' } : {}),
+          ...(type === 'retriever' ? { topK: 4 } : {}),
         } as any,
       };
 
@@ -89,6 +107,7 @@ const CanvasFlow = () => {
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         onEdgesDelete={onEdgesDelete}
+        onNodesDelete={onNodesDelete}
         onConnect={onConnect}
         onInit={() => console.log('Flow Initialized')}
         onDrop={onDrop}
