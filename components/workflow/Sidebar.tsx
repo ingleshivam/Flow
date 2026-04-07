@@ -1,5 +1,5 @@
 import React from 'react';
-import { MessageSquare, Terminal, Bot, Layout, LucideIcon, Info } from 'lucide-react';
+import { MessageSquare, Terminal, Bot, Layout, LucideIcon, Info, Database } from 'lucide-react';
 import { NodeType } from '@/types/workflow';
 import { 
   Card, 
@@ -107,6 +107,13 @@ const Sidebar = () => {
             icon={Layout}
             description="The final destination. Returns the processed AI response to the user."
             color="bg-orange-600"
+          />
+          <NodeItem
+            type="memory"
+            label="Memory"
+            icon={Database}
+            description="Stores conversation history and injects past turns into the Language Model for multi-turn awareness."
+            color="bg-pink-500"
           />
         </div>
       </ScrollArea>

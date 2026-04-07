@@ -12,7 +12,7 @@ const ChatOutputNode = ({ data }: { data: ChatOutputData }) => {
         className="!w-3 !h-3 !bg-blue-600 !border-[2px] !border-white !-left-1.5 shadow-sm hover:scale-125 transition-transform"
         style={{ top: '50%' }}
       />
-      
+
       {/* Header */}
       <div className="p-4 pb-3">
         <div className="flex items-center justify-between mb-1.5">
@@ -36,7 +36,7 @@ const ChatOutputNode = ({ data }: { data: ChatOutputData }) => {
             <label className="text-xs font-bold text-slate-700">Inputs<span className="text-red-500">*</span></label>
             <Info size={14} className="text-slate-300" />
           </div>
-          
+
           <div className="relative">
             <div className="w-full p-2.5 pr-8 text-xs border border-slate-100 rounded-xl bg-slate-50/50 min-h-[40px] flex items-center font-medium">
               <span className="text-slate-500">
@@ -47,7 +47,7 @@ const ChatOutputNode = ({ data }: { data: ChatOutputData }) => {
           </div>
 
           {data.output && (
-            <div className="mt-3 p-3 bg-blue-50/30 rounded-xl border border-blue-100/50">
+            <div className="mt-3 p-3 bg-blue-50/30 rounded-xl border border-blue-100/50 max-h-[240px] overflow-y-auto">
               <p className="text-[11px] text-slate-700 whitespace-pre-wrap leading-relaxed font-medium">
                 {data.output}
               </p>

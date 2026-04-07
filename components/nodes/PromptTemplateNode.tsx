@@ -10,12 +10,6 @@ const PromptTemplateNode = ({ id, data }: { id: string, data: PromptTemplateData
   return (
     <div className="bg-white rounded-2xl border border-border shadow-sm w-[350px] group transition-all hover:shadow-md hover:border-slate-300 relative">
       <Handle
-        type="target"
-        position={Position.Left}
-        className="!w-3 !h-3 !bg-blue-600 !border-[2px] !border-white !-left-1.5 shadow-sm hover:scale-125 transition-transform"
-        style={{ top: '50%' }}
-      />
-      <Handle
         type="source"
         position={Position.Right}
         className="!w-3 !h-3 !bg-blue-600 !border-[2px] !border-white !-right-1.5 shadow-sm hover:scale-125 transition-transform"

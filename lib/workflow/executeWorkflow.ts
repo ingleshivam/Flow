@@ -1,13 +1,16 @@
 import { Edge } from '@xyflow/react';
-import { WorkflowNode, ChatInputData, PromptTemplateData, LanguageModelData } from '@/types/workflow';
+import { WorkflowNode, ChatInputData, PromptTemplateData, LanguageModelData, MemoryData, MemoryMessage } from '@/types/workflow';
 
 /**
  * Advanced execution logic:
  * 1. Finds the Language Model node.
  * 2. Traces back its 'input' handle to find the Chat Input content.
  * 3. Traces back its 'systemMessage' handle to find the Prompt Template content.
- * 4. Verifies API Key.
- * 5. Mock executes and updates outputs.
+ * 4. (Optional) Traces back its 'memory' handle to inject conversation history.
+ * 5. Verifies API Key.
+ * 6. Executes the LLM request.
+ * 7. Saves the new turn back to the Memory node (if connected).
+ * 8. Pushes output to Chat Output node.
  */
 export const executeWorkflowLogic = async (nodes: WorkflowNode[], edges: Edge[]): Promise<WorkflowNode[]> => {
   let updatedNodes = [...nodes];
@@ -46,44 +49,65 @@ export const executeWorkflowLogic = async (nodes: WorkflowNode[], edges: Edge[])
   // 4. Parse Prompt Templates (Replace any {{input}} variables)
   const formattedSystemPrompt = systemContent.replace(/\{\{\s*input\s*\}\}/g, inputContent);
 
-  // 5. Execute Live LLM Request
+  // 5. Resolve Memory (optional — Memory node -> LM.memory)
+  let memoryNode: WorkflowNode | null = null;
+  let historyMessages: MemoryMessage[] = [];
+
+  const memoryEdge = edges.find(e => e.target === llmNode.id && e.targetHandle === 'memory');
+  if (memoryEdge) {
+    const sourceNode = nodes.find(n => n.id === memoryEdge.source);
+    if (sourceNode?.type === 'memory') {
+      memoryNode = sourceNode;
+      const memData = sourceNode.data as MemoryData;
+      const windowSize = memData.windowSize ?? 5;
+      // Grab the last N turns (each turn = user + assistant, so 2 messages per turn)
+      historyMessages = (memData.history ?? []).slice(-(windowSize * 2));
+    }
+  }
+
+  // 6. Execute Live LLM Request
   let liveResponseText = '';
   try {
-    const isOpenRouter = llmData.model.includes('/') || llmData.model.toLowerCase().includes('claude') || llmData.model.toLowerCase().includes('gemini') || llmData.model.toLowerCase().includes('llama');
-    const endpoint = isOpenRouter 
-      ? 'https://openrouter.ai/api/v1/chat/completions' 
-      : 'https://api.openai.com/v1/chat/completions';
+    const provider = llmData.provider || 'openai';
 
+    // --- Resolve endpoint ---
+    const ENDPOINTS: Record<string, string> = {
+      openai: 'https://api.openai.com/v1/chat/completions',
+      openrouter: 'https://openrouter.ai/api/v1/chat/completions',
+      groq: 'https://api.groq.com/openai/v1/chat/completions',
+    };
+    const endpoint = ENDPOINTS[provider] ?? ENDPOINTS.openai;
+
+    // --- Build headers ---
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${llmData.apiKey}`
+      'Authorization': `Bearer ${llmData.apiKey}`,
     };
-
-    if (isOpenRouter) {
-      headers['HTTP-Referer'] = 'http://localhost:3000'; // Required by OpenRouter
+    if (provider === 'openrouter') {
+      headers['HTTP-Referer'] = 'http://localhost:3000';
       headers['X-Title'] = 'Flow AI Workflow Builder';
     }
 
-    // Determine actual model name. Since options include 'GPT-4o', map to correct ID if necessary, or pass strictly if OpenRouter.
-    let apiModelID = llmData.model;
-    if (!isOpenRouter) {
-      if (apiModelID.toLowerCase() === 'gpt-4o') apiModelID = 'gpt-4o';
-      if (apiModelID.toLowerCase() === 'gpt-4.1') apiModelID = 'gpt-4-turbo'; // Fallback mapping for OpenAI
-    }
+    // Model ID is stored directly as the API-ready string in PROVIDER_MODELS
+    const apiModelID = llmData.model;
+
+    // Build messages: system → history turns → current user message
+    const messages: { role: string; content: string }[] = [
+      { role: 'system', content: formattedSystemPrompt },
+      ...historyMessages.map(m => ({ role: m.role, content: m.content })),
+      { role: 'user', content: inputContent },
+    ];
 
     const payload = {
       model: apiModelID,
-      messages: [
-        { role: 'system', content: formattedSystemPrompt },
-        { role: 'user', content: inputContent }
-      ],
+      messages,
       temperature: 0.7,
     };
 
     const response = await fetch(endpoint, {
       method: 'POST',
       headers,
-      body: JSON.stringify(payload)
+      body: JSON.stringify(payload),
     });
 
     if (!response.ok) {
@@ -98,14 +122,25 @@ export const executeWorkflowLogic = async (nodes: WorkflowNode[], edges: Edge[])
     throw new Error(`LLM Execution failed: ${err.message}`);
   }
 
-  // 6. Update LLM node output
-  updatedNodes = updateNodeOutput(updatedNodes, llmNode.id, { 
+  // 7. Update LLM node output
+  updatedNodes = updateNodeOutput(updatedNodes, llmNode.id, {
     output: liveResponseText,
     inputText: inputContent,
-    systemMessage: formattedSystemPrompt
+    systemMessage: formattedSystemPrompt,
   });
 
-  // 7. Push to Chat Output if connected
+  // 8. Save the new turn back to the Memory node
+  if (memoryNode) {
+    const memData = memoryNode.data as MemoryData;
+    const newHistory: MemoryMessage[] = [
+      ...(memData.history ?? []),
+      { role: 'user', content: inputContent, timestamp: Date.now() },
+      { role: 'assistant', content: liveResponseText, timestamp: Date.now() },
+    ];
+    updatedNodes = updateNodeOutput(updatedNodes, memoryNode.id, { history: newHistory });
+  }
+
+  // 9. Push to Chat Output if connected
   const outputEdge = edges.find(e => e.source === llmNode.id);
   if (outputEdge) {
     const outputNode = nodes.find(n => n.id === outputEdge.target);
@@ -124,8 +159,8 @@ const updateNodeOutput = (nodes: WorkflowNode[], id: string, dataUpdates: any): 
         ...node,
         data: {
           ...node.data,
-          ...dataUpdates
-        }
+          ...dataUpdates,
+        },
       };
     }
     return node;

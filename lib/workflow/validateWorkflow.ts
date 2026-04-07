@@ -1,5 +1,5 @@
 import { Edge } from '@xyflow/react';
-import { WorkflowNode, ChatInputData, PromptTemplateData, LanguageModelData } from '@/types/workflow';
+import { WorkflowNode, ChatInputData, PromptTemplateData, LanguageModelData, MemoryData } from '@/types/workflow';
 
 export interface ValidationResult {
   isValid: boolean;

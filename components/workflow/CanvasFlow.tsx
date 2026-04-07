@@ -18,6 +18,7 @@ import ChatInputNode from '../nodes/ChatInputNode';
 import PromptTemplateNode from '../nodes/PromptTemplateNode';
 import LanguageModelNode from '../nodes/LanguageModelNode';
 import ChatOutputNode from '../nodes/ChatOutputNode';
+import MemoryNode from '../nodes/MemoryNode';
 import { NodeType, WorkflowNode, ChatInputData, PromptTemplateData, LanguageModelData } from '@/types/workflow';
 import { v4 as uuidv4 } from 'uuid';
 import { Layout } from 'lucide-react';
@@ -29,6 +30,7 @@ const nodeTypes = {
   promptTemplate: PromptTemplateNode,
   languageModel: LanguageModelNode,
   chatOutput: ChatOutputNode,
+  memory: MemoryNode,
 };
 
 const edgeTypes = {
@@ -68,8 +70,9 @@ const CanvasFlow = () => {
           label: type.charAt(0).toUpperCase() + type.slice(1).replace(/([A-Z])/g, ' $1'),
           ...(type === 'chatInput' ? { inputText: '' } : {}),
           ...(type === 'promptTemplate' ? { template: 'Answer the following question: {{input}}' } : {}),
-          ...(type === 'languageModel' ? { model: 'GPT-4o', systemMessage: '', inputText: '', apiKey: '' } : {}),
+          ...(type === 'languageModel' ? { provider: 'openai', model: 'gpt-4o', systemMessage: '', inputText: '', apiKey: '' } : {}),
           ...(type === 'chatOutput' ? { output: '' } : {}),
+          ...(type === 'memory' ? { windowSize: 5, history: [] } : {}),
         } as any,
       };
 
