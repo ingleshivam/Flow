@@ -131,6 +131,8 @@ export interface WorkflowState {
   status: 'idle' | 'running' | 'success' | 'error';
   errorMessage: string | null;
   clearCanvas: () => void;
+  isFlowSheetOpen: boolean;
+  setFlowSheetOpen: (open: boolean) => void;
 }
 
 export const PROVIDERS: { id: Provider; label: string }[] = [

@@ -4,6 +4,7 @@ import React from 'react';
 import Sidebar from './Sidebar';
 import TopToolbar from './TopToolbar';
 import CanvasFlow from './CanvasFlow';
+import ExecutionFlowSheet from './ExecutionFlowSheet';
 import { Toaster } from 'sonner';
 
 const WorkflowBuilder = () => {
@@ -26,8 +27,9 @@ const WorkflowBuilder = () => {
       <TopToolbar />
       <div className="flex flex-1 overflow-hidden">
         <Sidebar />
-        <main className="flex-1 overflow-hidden">
+        <main className="flex-1 overflow-hidden relative">
           <CanvasFlow />
+          <ExecutionFlowSheet />
         </main>
       </div>
       <Toaster position="bottom-right" richColors />

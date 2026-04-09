@@ -93,6 +93,19 @@ const TextSplitterNode = ({ id, data }: { id: string; data: TextSplitterData }) 
           <Info size={12} className="shrink-0" />
           <p>Recursive character splitting is used by default.</p>
         </div>
+
+        {/* Preview Block */}
+        {(data.chunks as any[])?.length > 0 && (
+          <div className="p-2 bg-purple-50/30 rounded-lg border border-purple-100/50 mt-2">
+            <div className="flex items-center gap-1.5 text-[10px] font-bold text-purple-700 uppercase tracking-wider mb-1">
+              <Info size={12} />
+              Preview ({data.chunks?.length} Chunks)
+            </div>
+            <p className="text-[10px] text-slate-600 line-clamp-3 leading-relaxed font-medium italic">
+              "{(data.chunks as any[])[0].text.substring(0, 150)}..."
+            </p>
+          </div>
+        )}
       </div>
 
       {/* Footer */}

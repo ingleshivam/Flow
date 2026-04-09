@@ -23,7 +23,7 @@ const ChatOutputNode = ({ id, data }: { id: string; data: ChatOutputData }) => {
             <span className="text-base font-bold text-slate-900 tracking-tight">Chat Output</span>
           </div>
           <div className="flex items-center gap-1">
-            <button 
+            <button
               onClick={() => deleteNode(id)}
               className="p-1.5 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
               title="Delete node"

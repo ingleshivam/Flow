@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Play, Trash2, Rocket, Share2 } from 'lucide-react';
+import { Play, Trash2, Rocket, Share2, ListTree } from 'lucide-react';
 import { useWorkflowStore } from '@/store/workflowStore';
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -9,7 +9,7 @@ import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 
 const TopToolbar = () => {
-  const { executeWorkflow, clearCanvas, status } = useWorkflowStore();
+  const { executeWorkflow, clearCanvas, status, setFlowSheetOpen } = useWorkflowStore();
 
   return (
     <header className="h-14 border-b border-slate-200 bg-white/80 backdrop-blur-md flex items-center justify-between px-6 z-30 sticky top-0">
@@ -72,6 +72,16 @@ const TopToolbar = () => {
         </Button>
 
         <Separator orientation="vertical" className="h-5 mx-1.5" />
+
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => setFlowSheetOpen(true)}
+          className="h-8 gap-2 px-3 text-slate-600 hover:text-primary border-slate-200 hover:bg-slate-50 hover:border-slate-300 rounded-lg transition-all font-bold text-[10px] uppercase tracking-wider bg-white"
+        >
+          <ListTree size={13} />
+          <span>View Flow</span>
+        </Button>
 
         <Button
           onClick={executeWorkflow}

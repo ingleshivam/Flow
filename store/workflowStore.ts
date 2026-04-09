@@ -33,6 +33,8 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
   edges: getInitialEdges(),
   status: 'idle',
   errorMessage: null,
+  isFlowSheetOpen: false,
+  setFlowSheetOpen: (open: boolean) => set({ isFlowSheetOpen: open }),
 
   onNodesChange: (changes: NodeChange[]) => {
     set({
